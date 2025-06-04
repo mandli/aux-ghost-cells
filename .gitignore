@@ -1,6 +1,23 @@
+# GeoClaw stuff
+*.o
+*.mod
+.data
+*.data
+.output
+_output
+.plots
+_plots
+*.storm
+pyclaw.log
+xgeoclaw
+
+# MacOS
+.DS_Store
+
+
 # Prerequisites
 *.d
-
+`
 # Compiled Object files
 *.slo
 *.lo
