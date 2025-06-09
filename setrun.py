@@ -283,7 +283,7 @@ def setrun(claw_pkg='geoclaw'):
     # ---------------
     amrdata = rundata.amrdata
 
-    amrdata.max1d = 100
+    # amrdata.max1d = 10
 
     # max number of refinement levels:
     amrdata.amr_levels_max = 1
@@ -337,24 +337,40 @@ def setrun(claw_pkg='geoclaw'):
     # More AMR parameters can be set -- see the defaults in pyclaw/data.py
 
     # == setgauges.data values ==
-    rundata.gaugedata.aux_out_fields = [0, 1, 2, 3, 4, 5, 6]
+    rundata.gaugedata.aux_out_fields = [4, 5, 6]
     gauges = rundata.gaugedata.gauges
-    epsilon = 1e-2
+    epsilon = 0.13
     x = (clawdata.upper[0] - clawdata.lower[0]) / 2 + clawdata.lower[0]
     y = (clawdata.upper[1] - clawdata.lower[1]) / 2 + clawdata.lower[1]
     gauges.append([0, x, y, clawdata.t0, clawdata.tfinal])
-    gauges.append([1, x + epsilon, y + epsilon, clawdata.t0, clawdata.tfinal])
-    gauges.append([2, x - epsilon, y + epsilon, clawdata.t0, clawdata.tfinal])
-    gauges.append([3, x - epsilon, y - epsilon, clawdata.t0, clawdata.tfinal])
-    gauges.append([4, x + epsilon, y - epsilon, clawdata.t0, clawdata.tfinal])
-
-    # for gauges append lines of the form  [gaugeno, x, y, t1, t2]
-    # N_gauges = 21
-    # for i in range(0,N_gauges):
-    #     x = clawdata.lower[0] + 4.55 # This is right where the shelf turns into beach, 100 meter of water
-    #     y = clawdata.lower[1] + 5.0 / (N_gauges + 1) * (i+1)       # Start 25 km inside domain
-    #     gauges.append([i, x, y, 0.0, 1e10])
-    #     print("Gauge %s: (%s,%s)" % (i,x,y))
+    gauge_id = 1
+    gauges.append([gauge_id,     x + epsilon, y + epsilon, clawdata.t0, clawdata.tfinal])
+    gauges.append([gauge_id + 1, x - epsilon, y + epsilon, clawdata.t0, clawdata.tfinal])
+    gauges.append([gauge_id + 2, x - epsilon, y - epsilon, clawdata.t0, clawdata.tfinal])
+    gauges.append([gauge_id + 3, x + epsilon, y - epsilon, clawdata.t0, clawdata.tfinal])
+    gauge_sets = 5
+    for n in range(1, gauge_sets + 1):
+        gauge_id = (n - 1) * 8 + 5
+        # print(f"{gauge_id} - {gauge_id + 8}")
+        # UR
+        gauges.append([gauge_id,     x + epsilon, y + epsilon * n, clawdata.t0, clawdata.tfinal])
+        # UL
+        gauges.append([gauge_id + 1, x - epsilon, y + epsilon * n, clawdata.t0, clawdata.tfinal])
+        # LU
+        gauges.append([gauge_id + 2, x - epsilon * n, y + epsilon, clawdata.t0, clawdata.tfinal])
+        # RU
+        gauges.append([gauge_id + 3, x + epsilon * n, y + epsilon, clawdata.t0, clawdata.tfinal])
+        # DR
+        gauges.append([gauge_id + 4, x + epsilon, y - epsilon * n, clawdata.t0, clawdata.tfinal])
+        # DL
+        gauges.append([gauge_id + 5, x - epsilon, y - epsilon * n, clawdata.t0, clawdata.tfinal])
+        # LD
+        gauges.append([gauge_id + 6, x - epsilon * n, y - epsilon, clawdata.t0, clawdata.tfinal])
+        # RD
+        gauges.append([gauge_id + 7, x + epsilon * n, y - epsilon, clawdata.t0, clawdata.tfinal])
+        
+    # for gauge in gauges:
+    #     print(f"{gauge[0]}: ({gauge[1]}, {gauge[2]})")
 
     #------------------------------------------------------------------
     # GeoClaw specific parameters:
@@ -456,22 +472,18 @@ def setgeo(rundata):
     # 16 time steps, because 6 hour steps in 4 days
     forecasts = 16
     my_storm = Storm(file_format="geoclaw")
-    my_storm.time_offset = datetime.datetime(2008, 9 , 13, 7) # Year, Month, Day
-    my_storm.t = np.array([my_storm.time_offset + i * datetime.timedelta(hours=6)
-                  for i in range(forecasts)]) #over 4 days
-    
-    # general smooth function
-    def f(t):
-        return 100 * np.exp(-(t**2)/2) # implementing a guassian curve
-        
-    ## define an interval of the function in which the storm will use
-    a = -3.0 # start of interval, usually 0
-    b = 3.0 # end of interval, can be changed
+    my_storm.time_offset = np.datetime64("2008-09-13T07")
+    t_series = np.linspace(rundata.clawdata.t0, rundata.clawdata.tfinal, forecasts, dtype=int)
+    my_storm.t = np.array([my_storm.time_offset + np.timedelta64(t, 's') 
+                                for t in t_series])
 
-    t_series = np.linspace(a,b, num=16)
-
-    my_storm.eye_location = np.array([[-88.0, 22.0]]*forecasts) 
-    max_wind_speed = np.array([f(t) for t in t_series])
+    def storm_location(t):
+        eye_init = (-80, 15)
+        # 15 km / h -> 1 degree / 110 km * 1 h / 3600 s
+        v = (-np.sqrt(2) * 15 / 110 / 3600, np.sqrt(2) * 15 / 110 / 3600)
+        return [v[i] * t + eye_init[i] for i in range(2)]
+    my_storm.eye_location = np.array(storm_location(t_series)).transpose()
+    max_wind_speed = 100 * np.exp(-(t_series - (t_series[-1] / 2))**2 / (t_series[-1] / 4)**2)
     
     my_storm.max_wind_speed = max_wind_speed
 
