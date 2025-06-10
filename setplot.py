@@ -17,28 +17,28 @@ try:
 except:
     setplotfg = None
 
-def gauge_topo(cd, dry_tolerance=1e-16, topo_index=None):
-    """"""
-    if not topo_index:
-        # Assumes that topo is in the first location in aux
-        topo_index = 4 + 0
-    return cd.gaugesoln.q[topo_index, :]
+# def gauge_topo(cd, dry_tolerance=1e-16, topo_index=None):
+#     """"""
+#     if not topo_index:
+#         # Assumes that topo is in the first location in aux
+#         topo_index = 4 + 0
+#     return cd.gaugesoln.q[topo_index, :]
 
-def gauge_wind(cd, dry_tolerance=1e-16, wind_index=None):
-    """"""
-    if not wind_index:
-        # Assumes that all aux fields were written out
-        wind_index = 4 + wind_field 
-    return np.sqrt(cd.gaugesoln.q[wind_index, :]**2 + 
-                   cd.gaugesoln.q[wind_index + 1, :]**2)
+# def gauge_wind(cd, dry_tolerance=1e-16, wind_index=None):
+#     """"""
+#     if not wind_index:
+#         # Assumes that all aux fields were written out
+#         wind_index = 4 + wind_field 
+#     return np.sqrt(cd.gaugesoln.q[wind_index, :]**2 + 
+#                    cd.gaugesoln.q[wind_index + 1, :]**2)
 
 
-def gauge_pressure(cd, dry_tolerance=1e-16, pressure_index=None):
-    """"""
-    if not pressure_index:
-        # Assumes that all aux fields were written out
-        pressure_index = 4 + pressure_field 
-    return cd.gaugesoln.q[pressure_index, :]
+# def gauge_pressure(cd, dry_tolerance=1e-16, pressure_index=None):
+#     """"""
+#     if not pressure_index:
+#         # Assumes that all aux fields were written out
+#         pressure_index = 4 + pressure_field 
+#     return cd.gaugesoln.q[pressure_index, :]
 
 
 def setplot(plotdata=None):
@@ -155,26 +155,26 @@ def setplot(plotdata=None):
     # ========================================================================
     #  Figures for gauges
     # ========================================================================
-    plotfigure = plotdata.new_plotfigure(name='Gauge Surfaces', figno=300,
-                                         type='each_gauge')
-    plotfigure.show = True
-    plotfigure.clf_each_gauge = True
+    # plotfigure = plotdata.new_plotfigure(name='Gauge Surfaces', figno=300,
+    #                                      type='each_gauge')
+    # plotfigure.show = True
+    # plotfigure.clf_each_gauge = True
 
-    plotaxes = plotfigure.new_plotaxes()
-    plotaxes.time_scale = 1 / (24 * 60**2)
-    plotaxes.grid = True
-    plotaxes.xlimits = [0, 4]
-    plotaxes.ylimits = 'auto'
-    plotaxes.title = "Surface"
-    plotaxes.ylabel = "Surface (m)"
-    plotaxes.time_label = "Days relative to landfall"
+    # plotaxes = plotfigure.new_plotaxes()
+    # plotaxes.time_scale = 1 / (24 * 60**2)
+    # plotaxes.grid = True
+    # plotaxes.xlimits = [0, 4]
+    # plotaxes.ylimits = 'auto'
+    # plotaxes.title = "Surface"
+    # plotaxes.ylabel = "Surface (m)"
+    # plotaxes.time_label = "Days relative to landfall"
     
-    plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
-    plotitem.plot_var = surgeplot.gauge_surface
-    # Plot red area if gauge is dry
-    plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
-    plotitem.plot_var = surgeplot.gauge_dry_regions
-    plotitem.kwargs = {"color":'lightcoral', "linewidth":5}
+    # plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
+    # plotitem.plot_var = surgeplot.gauge_surface
+    # # Plot red area if gauge is dry
+    # plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
+    # plotitem.plot_var = surgeplot.gauge_dry_regions
+    # plotitem.kwargs = {"color":'lightcoral', "linewidth":5}
 
     # === Gauge Wind
     plotfigure = plotdata.new_plotfigure(name='Gauge Wind Speed',
@@ -192,7 +192,7 @@ def setplot(plotdata=None):
     plotaxes.time_label = "Days relative to landfall"
     
     plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
-    plotitem.plot_var = lambda cd: gauge_wind(cd, wind_index=4)
+    plotitem.plot_var = lambda cd: surgeplot.gauge_wind(cd, wind_index=5)
 
     # === Gauge Pressure
     plotfigure = plotdata.new_plotfigure(name='Gauge Pressure',
@@ -210,7 +210,7 @@ def setplot(plotdata=None):
     plotaxes.time_label = "Days relative to landfall"
     
     plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
-    plotitem.plot_var = lambda cd: gauge_pressure(cd, pressure_index=6)
+    plotitem.plot_var = lambda cd: surgeplot.gauge_pressure(cd, pressure_index=7)
 
     # === Gauge Bathy
     plotfigure = plotdata.new_plotfigure(name='Gauge Bathy',
@@ -223,12 +223,12 @@ def setplot(plotdata=None):
     plotaxes.grid = True
     plotaxes.xlimits = [0, 4]
     plotaxes.ylimits = 'auto'
-    plotaxes.title = "Pressure"
-    plotaxes.ylabel = "Pressure (kPa)"
+    plotaxes.title = "Topography"
+    plotaxes.ylabel = "Topography (m)"
     plotaxes.time_label = "Days relative to landfall"
 
     plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
-    plotitem.plot_var = gauge_topo
+    plotitem.plot_var = surgeplot.gauge_topo
 
     # =====================
     #  Gauge Location Plot
@@ -250,8 +250,8 @@ def setplot(plotdata=None):
     # plotaxes.ylimits = [clawdata.lower[1], clawdata.upper[1]]
     x = (clawdata.upper[0] - clawdata.lower[0]) / 2 + clawdata.lower[0]
     y = (clawdata.upper[1] - clawdata.lower[1]) / 2 + clawdata.lower[1]
-    plotaxes.xlimits = [x - 1, x + 1]
-    plotaxes.ylimits = [y - 1, y + 1]
+    plotaxes.xlimits = [x - 1.25, x + 1.25]
+    plotaxes.ylimits = [y - 1.25, y + 1.25]
     plotaxes.afteraxes = gauge_location_afteraxes
     surgeplot.add_surface_elevation(plotaxes, bounds=surface_limits)
     surgeplot.add_land(plotaxes, bounds=[0.0, 20.0])
@@ -268,7 +268,7 @@ def setplot(plotdata=None):
     plotdata.print_format = 'png'            # file format
     plotdata.print_framenos = 'all'          # list of frames to print
     # plotdata.print_framenos = 'none'          # list of frames to print
-    plotdata.print_gaugenos = [1, 2, 3, 4]   # list of gauges to print
+    plotdata.print_gaugenos = 'all'
     # plotdata.print_fignos = 'all'            # list of figures to print
     plotdata.print_fignos = [548, 300, 476, 477, 478, 479]
     plotdata.html = True                     # create html files of plots?

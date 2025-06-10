@@ -286,7 +286,7 @@ def setrun(claw_pkg='geoclaw'):
     # amrdata.max1d = 10
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 1
+    amrdata.amr_levels_max = 2
 
     # List of refinement ratios at each level (length at least mxnest-1)
     # Run resolution.py 2 2 4 8 16 to see approximate resolutions
@@ -336,8 +336,16 @@ def setrun(claw_pkg='geoclaw'):
     
     # More AMR parameters can be set -- see the defaults in pyclaw/data.py
 
+    rundata.regiondata.regions = []
+    # to specify regions of refinement append lines of the form
+    #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
+    x = (clawdata.upper[0] - clawdata.lower[0]) / 2 + clawdata.lower[0]
+    y = (clawdata.upper[1] - clawdata.lower[1]) / 2 + clawdata.lower[1]
+    rundata.regiondata.regions.append([2, 2, clawdata.t0, clawdata.tfinal, 
+                                             x - 1, x + 1, y - 1, y + 1])
+
     # == setgauges.data values ==
-    rundata.gaugedata.aux_out_fields = [4, 5, 6]
+    rundata.gaugedata.aux_out_fields = [0, 4, 5, 6]
     gauges = rundata.gaugedata.gauges
     epsilon = 0.13
     x = (clawdata.upper[0] - clawdata.lower[0]) / 2 + clawdata.lower[0]
