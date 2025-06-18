@@ -106,6 +106,7 @@ def setrun(claw_pkg='geoclaw'):
     # -------------
 
     clawdata.t0 = 0 #-days2seconds(3)
+    clawdata.tfinal = days2seconds(4)
 
     # Restart from checkpoint file of a previous run?
     # Note: If restarting, you must also change the Makefile to set:
@@ -126,12 +127,12 @@ def setrun(claw_pkg='geoclaw'):
     # Note that the time integration stops after the final output time.
     # The solution at initial time t0 is always written in addition.
 
-    clawdata.output_style = 1 # previously 2
+    clawdata.output_style = 3 # previously 2
 
     if clawdata.output_style==1:
         # Output nout frames at equally spaced times up to tfinal:
         # clawdata.tfinal = days2seconds(date2days('2008091400'))
-        clawdata.tfinal = days2seconds(4)
+        
         recurrence = 4 # previously 24
         clawdata.num_output_times = int((clawdata.tfinal - clawdata.t0) 
                                             * recurrence / (60**2 * 24))
@@ -146,11 +147,11 @@ def setrun(claw_pkg='geoclaw'):
     elif clawdata.output_style == 3:
         # Output every iout timesteps with a total of ntot time steps:
         clawdata.output_step_interval = 1
-        clawdata.total_steps = 1
+        clawdata.total_steps = 10
         clawdata.output_t0 = True
 
 
-    clawdata.output_format = 'binary'      # 'ascii' or 'netcdf' 
+    clawdata.output_format = 'ascii'      # 'ascii' or 'netcdf' 
 
     clawdata.output_q_components = 'all'   # could be list such as [True,True]
     clawdata.output_aux_components = 'all' # could be list
@@ -283,7 +284,7 @@ def setrun(claw_pkg='geoclaw'):
     # ---------------
     amrdata = rundata.amrdata
 
-    # amrdata.max1d = 10
+    amrdata.max1d = 400
 
     # max number of refinement levels:
     amrdata.amr_levels_max = 2
@@ -319,7 +320,7 @@ def setrun(claw_pkg='geoclaw'):
     amrdata.clustering_cutoff = 0.700000
 
     # print info about each regridding up to this level:
-    amrdata.verbosity_regrid = 0  
+    amrdata.verbosity_regrid = 2
 
     #  ----- For developers ----- 
     # Toggle debugging print statements:
@@ -329,7 +330,7 @@ def setrun(claw_pkg='geoclaw'):
     amrdata.gprint = False      # grid bisection/clustering
     amrdata.nprint = False      # proper nesting output
     amrdata.pprint = False      # proj. of tagged points
-    amrdata.rprint = False      # print regridding summary
+    amrdata.rprint = True       # print regridding summary
     amrdata.sprint = False      # space/memory output
     amrdata.tprint = False      # time step reporting each level
     amrdata.uprint = False      # update/upbnd reporting
@@ -515,7 +516,7 @@ def setgeo(rundata):
     my_storm.storm_radius = 300000 * np.ones(my_storm.t.shape)
 
     my_storm.write("my_storm.storm", file_format='geoclaw')
-    data.display_landfall_time = True
+    data.display_landfall_time = False
 
     
     # =======================

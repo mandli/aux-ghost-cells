@@ -81,20 +81,27 @@ def setplot(plotdata=None):
     pressure_limits = [935, 1013]
     friction_bounds = [0.01, 0.04]
 
+    # Center of domain
+    x = (clawdata.upper[0] - clawdata.lower[0]) / 2 + clawdata.lower[0]
+    y = (clawdata.upper[1] - clawdata.lower[1]) / 2 + clawdata.lower[1]
+
     def friction_after_axes(cd):
         plt.title(r"Manning's $n$ Coefficient")
 
     # ==========================================================================
     #   Plot specifications
     # ==========================================================================
-    regions = {"Gulf": {"xlimits": (clawdata.lower[0], clawdata.upper[0]),
+    regions = {"Full": {"xlimits": (clawdata.lower[0], clawdata.upper[0]),
                         "ylimits": (clawdata.lower[1], clawdata.upper[1]),
+                        "figsize": (6.4, 4.8)},
+               "Zoom": {"xlimits": (x - 2, x + 2), 
+                        "ylimits": (y - 2, y + 2),
                         "figsize": (6.4, 4.8)},}
 
-    for (name, region_dict) in regions.items():
+    for (i, (name, region_dict)) in enumerate(regions.items()):
 
         # Surface Figure
-        plotfigure = plotdata.new_plotfigure(name="Surface - %s" % name)
+        plotfigure = plotdata.new_plotfigure(name=f"Surface - {name}", figno=1+i)
         plotfigure.kwargs = {"figsize": region_dict['figsize']}
         plotaxes = plotfigure.new_plotaxes()
         plotaxes.title = "Surface"
@@ -106,8 +113,8 @@ def setplot(plotdata=None):
         surgeplot.add_land(plotaxes, bounds=[0.0, 20.0])
         plotaxes.plotitem_dict['surface'].amr_patchedges_show = [1] * 10
         plotaxes.plotitem_dict['land'].amr_patchedges_show = [1] * 10
-        plotaxes.plotitem_dict['surface'].amr_celledges_show = [1] * 10
-        plotaxes.plotitem_dict['land'].amr_celledges_show = [1] * 10
+        # plotaxes.plotitem_dict['surface'].amr_celledges_show = [1] * 10
+        # plotaxes.plotitem_dict['land'].amr_celledges_show = [1] * 10
 
         # Speed Figure
         plotfigure = plotdata.new_plotfigure(name="Currents - %s" % name)
@@ -131,8 +138,8 @@ def setplot(plotdata=None):
     plotfigure.show = surge_data.pressure_forcing and True
 
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = regions['Gulf']['xlimits']
-    plotaxes.ylimits = regions['Gulf']['ylimits']
+    plotaxes.xlimits = regions['Full']['xlimits']
+    plotaxes.ylimits = regions['Full']['ylimits']
     plotaxes.title = "Pressure Field"
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
@@ -144,8 +151,8 @@ def setplot(plotdata=None):
     plotfigure.show = surge_data.wind_forcing and True
 
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = regions['Gulf']['xlimits']
-    plotaxes.ylimits = regions['Gulf']['ylimits']
+    plotaxes.xlimits = regions['Full']['xlimits']
+    plotaxes.ylimits = regions['Full']['ylimits']
     plotaxes.title = "Wind Field"
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
@@ -246,10 +253,6 @@ def setplot(plotdata=None):
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.title = 'Gauge Locations'
     plotaxes.scaled = True
-    # plotaxes.xlimits = [clawdata.lower[0], clawdata.upper[0]]
-    # plotaxes.ylimits = [clawdata.lower[1], clawdata.upper[1]]
-    x = (clawdata.upper[0] - clawdata.lower[0]) / 2 + clawdata.lower[0]
-    y = (clawdata.upper[1] - clawdata.lower[1]) / 2 + clawdata.lower[1]
     plotaxes.xlimits = [x - 1.25, x + 1.25]
     plotaxes.ylimits = [y - 1.25, y + 1.25]
     plotaxes.afteraxes = gauge_location_afteraxes
@@ -270,7 +273,7 @@ def setplot(plotdata=None):
     # plotdata.print_framenos = 'none'          # list of frames to print
     plotdata.print_gaugenos = 'all'
     # plotdata.print_fignos = 'all'            # list of figures to print
-    plotdata.print_fignos = [548, 300, 476, 477, 478, 479]
+    plotdata.print_fignos = [1, 2, 548, 300, 476, 477, 478, 479]
     plotdata.html = True                     # create html files of plots?
     plotdata.latex = True                    # create latex file of plots?
     plotdata.latex_figsperline = 2           # layout of plots
